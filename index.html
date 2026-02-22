@@ -351,7 +351,7 @@ const isSellerLoggedIn = () => localStorage.getItem("sellerLoggedIn") === "1";
           li.textContent = نام: ${item.name} | پکیج: ${item.package};
           list.appendChild(li);
         });
-      };
+      
 
       const renderAdminList = () => {
         const list = $("adminList");
@@ -403,3 +403,4 @@ const isSellerLoggedIn = () => localStorage.getItem("sellerLoggedIn") === "1";
   </script>
 </body>
 </html>
+
