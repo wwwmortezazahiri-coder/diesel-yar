@@ -1,52 +1,51 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>دیزل یار</title>
-    <style>
-        body { background: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: system-ui; margin: 0; }
-        .card { background: #2d2d2d; max-width: 400px; padding: 30px; border-radius: 40px; border: 2px solid gold; }
-        h1 { color: gold; text-align: center; }
-        .qr-box { background: white; width: 200px; height: 200px; margin: 20px auto; border-radius: 30px; display: flex; align-items: center; justify-content: center; }
-        .btn { background: gold; color: black; padding: 15px; width: 100%; border-radius: 50px; font-size: 1.2em; border: 0; }
-        .info { background: #1a1a1a; padding: 15px; border-radius: 20px; color: white; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>⛽ دیزل‌یار</h1>
-        <div class="qr-box">📱 QR</div>
-        <button class="btn" onclick="alert('0912xxxxxxx')">تماس با پشتیبانی</button>
-        <div class="info">
-            <p>🔧 مدل: DG-6000</p>
-            <p>⏰ سرویس بعدی: ۱۴۰۵/۰۲/۲۰</p>
-        </div>
-    </div>
-</body>
-</html><!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <title>دیزل یار</title>
-    <style>
-        body { background: #1a1a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: system-ui; margin: 0; }
-        .card { background: #2d2d2d; max-width: 400px; padding: 30px; border-radius: 40px; border: 2px solid gold; }
-        h1 { color: gold; text-align: center; }
-        .qr-box { background: white; width: 200px; height: 200px; margin: 20px auto; border-radius: 30px; display: flex; align-items: center; justify-content: center; }
-        .btn { background: gold; color: black; padding: 15px; width: 100%; border-radius: 50px; font-size: 1.2em; border: 0; }
-        .info { background: #1a1a1a; padding: 15px; border-radius: 20px; color: white; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>⛽ دیزل‌یار</h1>
-        <div class="qr-box">📱 QR</div>
-        <button class="btn" onclick="alert('0912xxxxxxx')">تماس با پشتیبانی</button>
-        <div class="info">
-            <p>🔧 مدل: DG-6000</p>
-            <p>⏰ سرویس بعدی: ۱۴۰۵/۰۲/۲۰</p>
-        </div>
-    </div>
+if(!rec || rec.status!=="ACTIVE"){
+        out.classList.remove("hidden");
+        out.innerHTML = <div class="title">عدم دسترسی</div><div class="muted">سریال فعال نیست.</div>;
+        return;
+      }
+      if(user!==rec.username || pass!==rec.password){
+        out.classList.remove("hidden");
+        out.innerHTML = <div class="title">خطا در ورود</div><div class="muted">نام‌کاربری یا رمز اشتباه است.</div>;
+        return;
+      }
+
+      const pkg = packages[rec.package];
+      let support = "";
+      if(rec.package===3 && rec.supportPhone){
+        support = <div class="row" style="margin-top:8px"><span class="tag ok">تلفن پشتیبانی</span><span>${rec.supportPhone}</span></div>;
+      }
+
+      out.classList.remove("hidden");
+      out.innerHTML = 
+        <div class="title">اطلاعات گارانتی</div>
+        <div class="row"><span class="tag ok">پکیج</span><span>${pkg.name}</span></div>
+        <div class="row" style="margin-top:8px"><span class="tag warn">مدت گارانتی</span><span>${pkg.months} ماه</span></div>
+        <div class="row" style="margin-top:8px"><span class="tag ok">تاریخ مشاهده</span><span>${nowDate()}</span></div>
+        ${support}
+      ;
+    }
+
+    // =========================
+    // Router
+    // =========================
+    const app = document.getElementById("app");
+    const r = route();
+    if(r==="home") app.innerHTML = renderHome();
+    if(r==="admin") app.innerHTML = renderAdmin();
+    if(r==="panel") app.innerHTML = renderPanel();
+    if(r==="qr") app.innerHTML = renderQR();
+
+    // Handle SPA navigation
+    document.querySelectorAll("a").forEach(a=>{
+      if(a.getAttribute("href").startsWith("/")){
+        a.addEventListener("click", e=>{
+          e.preventDefault();
+          history.pushState({}, "", a.getAttribute("href"));
+          location.reload();
+        });
+      }
+    });
+  </script>
+replace index.html
 </body>
 </html>
-
