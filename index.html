@@ -1,4 +1,4 @@
-
+مرتضی, [2/22/2026 1:56 AM]
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -80,8 +80,8 @@
         <h3>راهنما</h3>
         <ul class="muted">
           <li>فرمت QR: <span class="pill">site.com/c/{serial}</span></li>
-          <li>پکیج ۳ (طلایی): نمایش اطلاعات فقط بعد از ورود نام‌کاربری/رمز مشتری</li>
-          <li>شماره مشتری فقط در پنل فروشنده نمایش داده می‌شود</li>
+          <li>پکیج پریمیوم: نمایش اطلاعات فقط بعد از ورود نام‌کاربری/رمز مشتری</li>
+          <li>اطلاعات تماس مشتری در صفحه عمومی نمایش داده نمی‌شود</li>
         </ul>
       </div>
     </section>
@@ -97,7 +97,7 @@
         <div class="note">فاز ۱ بدون لاگین واقعی است. در فاز ۲ ورود با پیامک/ایمیل اضافه می‌شود.</div>
       </div>
 
-مرتضی, [2/21/2026 11:10 PM]
+مرتضی, [2/22/2026 1:56 AM]
 <div id="seller-area" class="hidden">
         <div class="card">
           <h3>پروفایل فروشنده</h3>
@@ -125,11 +125,12 @@
           <div class="row">
             <input id="act-serial" placeholder="سریال ۶ رقمی" />
             <input id="cust-name" placeholder="نام مشتری" />
-            <input id="cust-phone" placeholder="شماره مشتری" />
-            <input id="cust-user" placeholder="نام‌کاربری" />
-            <input id="cust-pass" placeholder="رمز عبور" />
+            <input id="cust-phone" placeholder="شماره مشتری (فقط پریمیوم)" />
+            <input id="cust-user" placeholder="نام‌کاربری (فقط پریمیوم)" />
+            <input id="cust-pass" placeholder="رمز عبور (فقط پریمیوم)" />
             <button id="activate-btn">فعال‌سازی</button>
           </div>
+          <div class="note">برای پکیج برنزی/نقره‌ای، نام‌کاربری/رمز/موبایل لازم نیست.</div>
           <div id="act-msg" class="note"></div>
         </div>
 
@@ -178,7 +179,7 @@
           <input id="upgrade-serial" placeholder="سریال" />
           <select id="upgrade-to">
             <option value="2">نقره‌ای</option>
-            <option value="3">طلایی</option>
+            <option value="3">پریمیوم</option>
           </select>
           <button id="upgrade-btn">محاسبه و ارتقاء</button>
         </div>
@@ -212,7 +213,8 @@ function daysBetween(a,b){
   const d1 = new Date(a), d2 = new Date(b);
   return Math.ceil((d2-d1)/(1000*60*60*24));
 }
-  
+
+مرتضی, [2/22/2026 1:56 AM]
 /* =======================
    Demo Database
 ======================= */
@@ -221,7 +223,7 @@ function generateSerials(countEach=10){
   const make = (prefix)=>{
     for(let i=0;i<countEach;i++){
       const num = Math.floor(10000+Math.random()*90000); // 5 digits
-      list.push({serial: ${prefix}${num}, package: prefix, status:"RAW", sellerId:null, customerId:null, services:[]}
+      list.push({serial: ${prefix}${num}, package: prefix, status:"RAW", sellerId:null, customerId:null, services:[]});
     }
   };
   make(1); make(2); make(3);
@@ -279,7 +281,7 @@ renderRoute();
 function badgeForPackage(p){
   return p==1 ? <span class="badge b-bronze">برنزی</span> :
          p==2 ? <span class="badge b-silver">نقره‌ای</span> :
-                <span class="badge b-gold">طلایی</span>;
+                <span class="badge b-gold">پریمیوم</span>;
 }
 function badgeForStatus(s){
   const map={
@@ -323,7 +325,7 @@ document.getElementById("public-check").addEventListener("click", ()=>{
   const brand = seller?.brandName?.trim() || seller?.name || "نامشخص";
   const cust = getCustomer(rec.customerId);
 
-  // پکیج ۳: گیت امنیتی
+  // پکیج پریمیوم: گیت امنیتی
   if(rec.package==3){
     box.classList.remove("hidden");
     box.innerHTML = `
@@ -336,13 +338,13 @@ document.getElementById("public-check").addEventListener("click", ()=>{
       </div>
       <div id="gate-res" class="note"></div>
 
-مرتضی, [2/21/2026 11:10 PM]
+مرتضی, [2/22/2026 1:56 AM]
 ;
     document.getElementById("gate-btn").addEventListener("click", ()=>{
       const u = document.getElementById("gate-user").value.trim();
       const p = document.getElementById("gate-pass").value.trim();
       if(u===cust?.username && p===cust?.password){
-        document.getElementById("gate-res").innerHTML = renderWarranty(rec, brand, seller?.supportPhone);
+        document.getElementById("gate-res").innerHTML = renderWarranty(rec, brand);
       }else{
         document.getElementById("gate-res").innerHTML = <span class="badge b-danger">نام‌کاربری/رمز نادرست است</span>;
       }
@@ -350,12 +352,12 @@ document.getElementById("public-check").addEventListener("click", ()=>{
     return;
   }
 
-  // پکیج ۱ و ۲
+  // پکیج برنزی/نقره‌ای
   box.classList.remove("hidden");
-  box.innerHTML = renderWarranty(rec, brand, seller?.supportPhone, false);
+  box.innerHTML = renderWarranty(rec, brand);
 });
 
-function renderWarranty(rec, brand, supportPhone, showSupport=true){
+function renderWarranty(rec, brand){
   const start = rec.startDate || "-";
   const end = rec.endDate || "-";
   const now = new Date().toISOString().slice(0,10);
@@ -381,7 +383,6 @@ function renderWarranty(rec, brand, supportPhone, showSupport=true){
       <div class="muted small">سرویس‌ها</div>
       <ul>${services}</ul>
     </div>
-    ${showSupport && supportPhone ? <div class="divider"></div><div>پشتیبانی فروشنده: <b>${supportPhone}</b></div> : ""}
   ;
 }
 
@@ -431,10 +432,66 @@ document.getElementById("activate-btn").addEventListener("click", ()=>{
     return;
   }
 
+  // اعتبارسنجی طبق پکیج
+  if(rec.package==3){
+    if(!name || !phone || !user || !pass){
+      msg.innerText="برای پریمیوم، نام مشتری، موبایل، نام‌کاربری و رمز الزامی است";
+      return;
+    }
+  }
+
   const custId = "c"+Date.now();
 
-مرتضی, [2/21/2026 11:10 PM]
-DB.customers.push({id:custId, name, phone, username:user, password:pass});
+مرتضی, [2/22/2026 1:56 AM]
+const remainingDays = rec.endDate ? Math.max(0, daysBetween(now, rec.endDate)) : totalDays;
+  const diff = (PRICES[to]-PRICES[rec.package]) * (remainingDays/totalDays);
+  rec.package = to;
+  rec.endDate = addMonths(now, WARRANTY_MONTHS[to]);
+  saveDB(DB);
+  msg.innerText = ارتقاء انجام شد | مبلغ تقریبی اختلاف: ${diff.toFixed(0)} واحد;
+  renderAdminSerials();
+});
+
+function renderAdminSerials(){
+  const html = DB.serials.map(s=>{
+    const seller = getSeller(s.sellerId);
+    return 
+      <tr>
+        <td>${s.serial}</td>
+        <td>${badgeForPackage(s.package)}</td>
+        <td>${badgeForStatus(s.status)}</td>
+        <td>${seller?.name || "-"}</td>
+        <td>${s.startDate || "-"}</td>
+        <td>${s.endDate || "-"}</td>
+        <td>${(s.services||[]).length}</td>
+      </tr>
+    ;
+  }).join("");
+  document.getElementById("admin-serials").innerHTML = 
+    <table class="table">
+      <thead>
+        <tr>
+          <th>سریال</th><th>پکیج</th><th>وضعیت</th><th>فروشنده</th>
+          <th>شروع</th><th>پایان</th><th>سرویس‌ها</th>
+        </tr>
+      </thead>
+      <tbody>${html}</tbody>
+    </table>
+  ;
+}
+renderAdminSerials();
+</script>
+</body>
+</html>
+
+مرتضی, [2/22/2026 1:56 AM]
+DB.customers.push({
+    id:custId,
+    name: name || "",
+    phone: phone || "",
+    username: user || "",
+    password: pass || ""
+  });
   rec.customerId = custId;
   rec.status = "ACTIVE";
   rec.startDate = new Date().toISOString().slice(0,10);
@@ -520,50 +577,3 @@ document.getElementById("upgrade-btn").addEventListener("click", ()=>{
   // محاسبه اختلاف هزینه از تاریخ ارتقاء
   const totalDays = WARRANTY_MONTHS[rec.package]*30;
   const now = new Date().toISOString().slice(0,10);
-  const remainingDays = rec.endDate ? Math.max(0, daysBetween(now, rec.endDate)) : totalDays;
-
-مرتضی, [2/21/2026 11:10 PM]
-const diff = (PRICES[to]-PRICES[rec.package]) * (remainingDays/totalDays);
-  rec.package = to;
-  rec.endDate = addMonths(now, WARRANTY_MONTHS[to]);
-  saveDB(DB);
-  msg.innerText = ارتقاء انجام شد | مبلغ تقریبی اختلاف: ${diff.toFixed(0)} واحد;
-  renderAdminSerials();
-});
-
-function renderAdminSerials(){
-  const html = DB.serials.map(s=>{
-    const seller = getSeller(s.sellerId);
-    return 
-      <tr>
-        <td>${s.serial}</td>
-        <td>${badgeForPackage(s.package)}</td>
-        <td>${badgeForStatus(s.status)}</td>
-        <td>${seller?.name || "-"}</td>
-        <td>${s.startDate || "-"}</td>
-        <td>${s.endDate || "-"}</td>
-        <td>${(s.services||[]).length}</td>
-      </tr>
-    ;
-  }).join("");
-  document.getElementById("admin-serials").innerHTML = 
-    <table class="table">
-      <thead>
-        <tr>
-          <th>سریال</th><th>پکیج</th><th>وضعیت</th><th>فروشنده</th>
-          <th>شروع</th><th>پایان</th><th>سرویس‌ها</th>
-        </tr>
-      </thead>
-      <tbody>${html}</tbody>
-    </table>
-  ;
-}
-renderAdminSerials();
-</script>
-</body>
-</html>
-
-
-
-
-
