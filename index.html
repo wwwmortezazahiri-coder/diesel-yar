@@ -1,51 +1,566 @@
-if(!rec || rec.status!=="ACTIVE"){
-        out.classList.remove("hidden");
-        out.innerHTML = <div class="title">عدم دسترسی</div><div class="muted">سریال فعال نیست.</div>;
-        return;
-      }
-      if(user!==rec.username || pass!==rec.password){
-        out.classList.remove("hidden");
-        out.innerHTML = <div class="title">خطا در ورود</div><div class="muted">نام‌کاربری یا رمز اشتباه است.</div>;
-        return;
-      }
-
-      const pkg = packages[rec.package];
-      let support = "";
-      if(rec.package===3 && rec.supportPhone){
-        support = <div class="row" style="margin-top:8px"><span class="tag ok">تلفن پشتیبانی</span><span>${rec.supportPhone}</span></div>;
-      }
-
-      out.classList.remove("hidden");
-      out.innerHTML = 
-        <div class="title">اطلاعات گارانتی</div>
-        <div class="row"><span class="tag ok">پکیج</span><span>${pkg.name}</span></div>
-        <div class="row" style="margin-top:8px"><span class="tag warn">مدت گارانتی</span><span>${pkg.months} ماه</span></div>
-        <div class="row" style="margin-top:8px"><span class="tag ok">تاریخ مشاهده</span><span>${nowDate()}</span></div>
-        ${support}
-      ;
+مرتضی, [2/21/2026 11:10 PM]
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diesel-Yar | فاز ۱</title>
+  <style>
+    :root{
+      --bg:#0f1115; --card:#171a21; --muted:#9aa3b2; --text:#e7eaf0;
+      --gold:#f5c542; --silver:#c0c7d1; --bronze:#c59a6d;
+      --danger:#ff6b6b; --ok:#4cd964; --blue:#5aa6ff;
     }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    .nav{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .nav-left{display:flex;gap:10px;align-items:center}
+    .brand{font-weight:700;font-size:20px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{padding:8px 14px;border-radius:10px;background:#1d2230;cursor:pointer}
+    .tab.active{background:#2b3347}
+    .card{background:var(--card);border:1px solid #222736;border-radius:16px;padding:16px;margin-bottom:14px}
+    .grid{display:grid;gap:12px}
+    .grid-2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+    .grid-3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    .muted{color:var(--muted)}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px}
+    .b-bronze{background:#3a2b1b;color:var(--bronze)}
+    .b-silver{background:#2b2f3a;color:var(--silver)}
+    .b-gold{background:#3a321b;color:var(--gold)}
+    .b-ok{background:#19321f;color:var(--ok)}
+    .b-danger{background:#3a1c1c;color:var(--danger)}
+    .b-blue{background:#182a3a;color:var(--blue)}
+    input,select,button,textarea{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a3142;
+      background:#11151d; color:var(--text); font-size:14px;
+    }
+    button{cursor:pointer}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row > *{flex:1 1 180px}
+    .hidden{display:none !important}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{padding:8px;border-bottom:1px solid #252a39;text-align:right;font-size:13px}
+    .note{font-size:12px;color:var(--muted)}
+    .pill{padding:6px 10px;border-radius:10px;background:#1b2130}
+    .divider{height:1px;background:#242a3a;margin:10px 0}
+    .status{font-weight:600}
+    .small{font-size:12px}
+    .right{float:right}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-left">
+        <div class="brand">Diesel‑Yar</div>
+        <div class="muted small">فاز ۱ | UI نمایشی</div>
+      </div>
+      <div class="tabs">
+        <div class="tab" data-route="/">صفحه عمومی</div>
+        <div class="tab" data-route="/panel">پنل فروشنده</div>
+        <div class="tab" data-route="/admin">پنل مدیریت</div>
+      </div>
+    </div>
 
-    // =========================
-    // Router
-    // =========================
-    const app = document.getElementById("app");
-    const r = route();
-    if(r==="home") app.innerHTML = renderHome();
-    if(r==="admin") app.innerHTML = renderAdmin();
-    if(r==="panel") app.innerHTML = renderPanel();
-    if(r==="qr") app.innerHTML = renderQR();
+    <!-- Public Page -->
+    <section id="page-public" class="page">
+      <div class="card">
+        <h2>استعلام گارانتی با سریال</h2>
+        <div class="row">
+          <input id="public-serial" placeholder="سریال ۶ رقمی (مثال: 1xxxxx)" />
+          <button id="public-check">بررسی</button>
+        </div>
+        <div id="public-result" class="card hidden" style="margin-top:12px;"></div>
+      </div>
 
-    // Handle SPA navigation
-    document.querySelectorAll("a").forEach(a=>{
-      if(a.getAttribute("href").startsWith("/")){
-        a.addEventListener("click", e=>{
-          e.preventDefault();
-          history.pushState({}, "", a.getAttribute("href"));
-          location.reload();
-        });
+      <div class="card">
+        <h3>راهنما</h3>
+        <ul class="muted">
+          <li>فرمت QR: <span class="pill">site.com/c/{serial}</span></li>
+          <li>پکیج ۳ (طلایی): نمایش اطلاعات فقط بعد از ورود نام‌کاربری/رمز مشتری</li>
+          <li>شماره مشتری فقط در پنل فروشنده نمایش داده می‌شود</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Seller Panel -->
+    <section id="page-panel" class="page hidden">
+      <div class="card">
+        <h2>ورود فروشنده (نمایشی)</h2>
+        <div class="row">
+          <select id="seller-select"></select>
+          <button id="seller-login">ورود</button>
+        </div>
+        <div class="note">فاز ۱ بدون لاگین واقعی است. در فاز ۲ ورود با پیامک/ایمیل اضافه می‌شود.</div>
+      </div>
+
+مرتضی, [2/21/2026 11:10 PM]
+<div id="seller-area" class="hidden">
+        <div class="card">
+          <h3>پروفایل فروشنده</h3>
+          <div class="grid grid-2">
+            <div>
+              <div class="muted small">نام فروشنده</div>
+              <div id="seller-name"></div>
+            </div>
+            <div>
+              <div class="muted small">نام برند (اختیاری)</div>
+              <input id="seller-brand" placeholder="نام برند را وارد کنید" />
+            </div>
+            <div>
+              <div class="muted small">تلفن پشتیبانی (اختیاری)</div>
+              <input id="seller-support" placeholder="09xxxxxxxxx" />
+            </div>
+            <div>
+              <button id="seller-save">ذخیره اطلاعات</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>فعال‌سازی سریال (QR خام)</h3>
+          <div class="row">
+            <input id="act-serial" placeholder="سریال ۶ رقمی" />
+            <input id="cust-name" placeholder="نام مشتری" />
+            <input id="cust-phone" placeholder="شماره مشتری" />
+            <input id="cust-user" placeholder="نام‌کاربری" />
+            <input id="cust-pass" placeholder="رمز عبور" />
+            <button id="activate-btn">فعال‌سازی</button>
+          </div>
+          <div id="act-msg" class="note"></div>
+        </div>
+
+        <div class="card">
+          <h3>لیست سریال‌های فروشنده</h3>
+          <div id="seller-serials"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Panel -->
+    <section id="page-admin" class="page hidden">
+      <div class="card">
+        <h2>مدیریت (فاز ۱)</h2>
+        <div class="row">
+          <button id="reset-db">بازسازی داده‌های نمایشی</button>
+          <button id="generate-serials">تولید سریال خام جدید</button>
+        </div>
+        <div class="note">در فاز ۱ داده‌ها در مرورگر ذخیره می‌شوند.</div>
+      </div>
+
+      <div class="card">
+        <h3>تحویل سریال به فروشنده</h3>
+        <div class="row">
+          <input id="assign-serial" placeholder="سریال" />
+          <select id="assign-seller"></select>
+          <button id="assign-btn">تحویل</button>
+        </div>
+        <div id="assign-msg" class="note"></div>
+      </div>
+
+      <div class="card">
+        <h3>مدیریت سرویس‌ها (قابل تغییر)</h3>
+        <div class="row">
+          <input id="service-serial" placeholder="سریال" />
+          <input id="service-title" placeholder="عنوان سرویس" />
+          <input id="service-date" placeholder="تاریخ (مثال: 1404/12/10)" />
+          <button id="service-add">افزودن/ویرایش</button>
+        </div>
+        <div id="service-msg" class="note"></div>
+      </div>
+
+      <div class="card">
+        <h3>ارتقاء پکیج</h3>
+        <div class="row">
+          <input id="upgrade-serial" placeholder="سریال" />
+          <select id="upgrade-to">
+            <option value="2">نقره‌ای</option>
+            <option value="3">طلایی</option>
+          </select>
+          <button id="upgrade-btn">محاسبه و ارتقاء</button>
+        </div>
+        <div id="upgrade-msg" class="note"></div>
+      </div>
+
+      <div class="card">
+        <h3>لیست سریال‌ها</h3>
+        <div id="admin-serials"></div>
+      </div>
+    </section>
+  </div>
+
+<script>
+/* =======================
+   Storage Helpers
+======================= */
+const STORAGE_KEY = "diesel_yar_db_v1";
+const PRICES = {1: 100, 2: 180, 3: 260}; // قیمت نمایشی
+const WARRANTY_MONTHS = {1:6, 2:12, 3:18};
+
+function saveDB(db){ localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+function loadDB(){ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }
+
+function addMonths(dateStr, months){
+  const d = new Date(dateStr);
+  d.setMonth(d.getMonth()+months);
+  return d.toISOString().slice(0,10);
+}
+function daysBetween(a,b){
+  const d1 = new Date(a), d2 = new Date(b);
+  return Math.ceil((d2-d1)/(1000*60*60*24));
+}
+
+مرتضی, [2/21/2026 11:10 PM]
+/* =======================
+   Demo Database
+======================= */
+function generateSerials(countEach=10){
+  const list=[];
+  const make = (prefix)=>{
+    for(let i=0;i<countEach;i++){
+      const num = Math.floor(10000+Math.random()*90000); // 5 digits
+      list.push({serial: ${prefix}${num}, package: prefix, status:"RAW", sellerId:null, customerId:null, services:[]});
+    }
+  };
+  make(1); make(2); make(3);
+  return list;
+}
+
+function seedDB(){
+  return {
+    sellers:[
+      {id:"s1", name:"فروشنده دیزل تهران", brandName:"", supportPhone:""},
+      {id:"s2", name:"فروشنده دیزل اصفهان", brandName:"", supportPhone:""}
+    ],
+    customers:[],
+    serials: generateSerials(8)
+  };
+}
+
+let DB = loadDB() || seedDB();
+saveDB(DB);
+
+/* =======================
+   Routing (SPA)
+======================= */
+const routes = {
+  "/": "page-public",
+  "/panel": "page-panel",
+  "/admin": "page-admin"
+};
+
+function setActiveTab(path){
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.classList.toggle("active", t.dataset.route===path);
+  });
+}
+
+function renderRoute(){
+  const path = location.pathname;
+  const pageId = routes[path] || "page-public";
+  document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+  document.getElementById(pageId).classList.remove("hidden");
+  setActiveTab(path in routes ? path : "/");
+}
+document.querySelectorAll(".tab").forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    history.pushState({}, "", tab.dataset.route);
+    renderRoute();
+  });
+});
+window.addEventListener("popstate", renderRoute);
+renderRoute();
+
+/* =======================
+   UI Helpers
+======================= */
+function badgeForPackage(p){
+  return p==1 ? <span class="badge b-bronze">برنزی</span> :
+         p==2 ? <span class="badge b-silver">نقره‌ای</span> :
+                <span class="badge b-gold">طلایی</span>;
+}
+function badgeForStatus(s){
+  const map={
+    RAW:<span class="badge b-blue">RAW</span>,
+    ASSIGNED:<span class="badge b-blue">ASSIGNED</span>,
+    ACTIVE:<span class="badge b-ok">ACTIVE</span>,
+    EXPIRED:<span class="badge b-danger">EXPIRED</span>,
+    LOCKED:<span class="badge b-danger">LOCKED</span>
+  };
+  return map[s] || s;
+}
+function getSerial(serial){ return DB.serials.find(x=>x.serial===serial); }
+function getSeller(id){ return DB.sellers.find(s=>s.id===id); }
+function getCustomer(id){ return DB.customers.find(c=>c.id===id); }
+
+/* =======================
+   Public Page
+======================= */
+document.getElementById("public-check").addEventListener("click", ()=>{
+  const serial = document.getElementById("public-serial").value.trim();
+  const rec = getSerial(serial);
+  const box = document.getElementById("public-result");
+  if(!rec){
+    box.classList.remove("hidden");
+    box.innerHTML = <div class="badge b-danger">یافت نشد</div><p>سریال معتبر نیست.</p>;
+    return;
+  }
+
+  // اگر فعال نیست
+  if(rec.status!=="ACTIVE"){
+    box.classList.remove("hidden");
+    box.innerHTML = 
+      <div class="row">
+        ${badgeForPackage(rec.package)} ${badgeForStatus(rec.status)}
+      </div>
+      <p>این سریال هنوز فعال نشده یا منقضی/مسدود است.</p>;
+    return;
+  }
+
+  const seller = getSeller(rec.sellerId);
+  const brand = seller?.brandName?.trim() || seller?.name || "نامشخص";
+  const cust = getCustomer(rec.customerId);
+
+  // پکیج ۳: گیت امنیتی
+  if(rec.package==3){
+    box.classList.remove("hidden");
+    box.innerHTML = `
+      <div class="row">${badgeForPackage(3)} ${badgeForStatus(rec.status)}</div>
+      <p class="muted">برای مشاهده اطلاعات، نام‌کاربری و رمز مشتری را وارد کنید.</p>
+      <div class="row">
+        <input id="gate-user" placeholder="نام‌کاربری">
+        <input id="gate-pass" placeholder="رمز عبور">
+        <button id="gate-btn">تأیید</button>
+      </div>
+      <div id="gate-res" class="note"></div>
+
+مرتضی, [2/21/2026 11:10 PM]
+;
+    document.getElementById("gate-btn").addEventListener("click", ()=>{
+      const u = document.getElementById("gate-user").value.trim();
+      const p = document.getElementById("gate-pass").value.trim();
+      if(u===cust?.username && p===cust?.password){
+        document.getElementById("gate-res").innerHTML = renderWarranty(rec, brand, seller?.supportPhone);
+      }else{
+        document.getElementById("gate-res").innerHTML = <span class="badge b-danger">نام‌کاربری/رمز نادرست است</span>;
       }
     });
-  </script>
-replace index.html
+    return;
+  }
+
+  // پکیج ۱ و ۲
+  box.classList.remove("hidden");
+  box.innerHTML = renderWarranty(rec, brand, seller?.supportPhone, false);
+});
+
+function renderWarranty(rec, brand, supportPhone, showSupport=true){
+  const start = rec.startDate || "-";
+  const end = rec.endDate || "-";
+  const now = new Date().toISOString().slice(0,10);
+  let renewal = "";
+  if(rec.endDate){
+    const daysLeft = daysBetween(now, rec.endDate);
+    if(daysLeft<=0 && daysLeft>=-3){
+      renewal = <div class="badge b-blue">فرصت تمدید: ۳ روز</div>;
+    }
+  }
+  const services = (rec.services||[]).map(s=><li>${s.title} — ${s.date}</li>).join("") || "<li>ثبت نشده</li>";
+  return 
+    <div class="divider"></div>
+    <div class="grid grid-2">
+      <div><div class="muted small">برند</div><div>${brand}</div></div>
+      <div><div class="muted small">سریال</div><div>${rec.serial}</div></div>
+      <div><div class="muted small">شروع گارانتی</div><div>${start}</div></div>
+      <div><div class="muted small">پایان گارانتی</div><div>${end}</div></div>
+    </div>
+    ${renewal}
+    <div class="divider"></div>
+    <div>
+      <div class="muted small">سرویس‌ها</div>
+      <ul>${services}</ul>
+    </div>
+    ${showSupport && supportPhone ? <div class="divider"></div><div>پشتیبانی فروشنده: <b>${supportPhone}</b></div> : ""}
+  ;
+}
+
+/* =======================
+   Seller Panel
+======================= */
+const sellerSelect = document.getElementById("seller-select");
+function loadSellerOptions(){
+  sellerSelect.innerHTML = DB.sellers.map(s=><option value="${s.id}">${s.name}</option>`).join("");
+  document.getElementById("assign-seller").innerHTML = sellerSelect.innerHTML;
+}
+loadSellerOptions();
+
+let currentSeller = null;
+
+document.getElementById("seller-login").addEventListener("click", ()=>{
+  currentSeller = getSeller(sellerSelect.value);
+  if(!currentSeller) return;
+  document.getElementById("seller-area").classList.remove("hidden");
+  document.getElementById("seller-name").innerText = currentSeller.name;
+  document.getElementById("seller-brand").value = currentSeller.brandName || "";
+  document.getElementById("seller-support").value = currentSeller.supportPhone || "";
+  renderSellerSerials();
+});
+
+document.getElementById("seller-save").addEventListener("click", ()=>{
+  if(!currentSeller) return;
+  currentSeller.brandName = document.getElementById("seller-brand").value.trim();
+  currentSeller.supportPhone = document.getElementById("seller-support").value.trim();
+  saveDB(DB);
+  renderSellerSerials();
+});
+
+document.getElementById("activate-btn").addEventListener("click", ()=>{
+  if(!currentSeller) return;
+  const serial = document.getElementById("act-serial").value.trim();
+  const name = document.getElementById("cust-name").value.trim();
+  const phone = document.getElementById("cust-phone").value.trim();
+  const user = document.getElementById("cust-user").value.trim();
+  const pass = document.getElementById("cust-pass").value.trim();
+  const msg = document.getElementById("act-msg");
+
+  const rec = getSerial(serial);
+  if(!rec){ msg.innerText="سریال یافت نشد"; return; }
+  if(rec.status!=="ASSIGNED" || rec.sellerId!==currentSeller.id){
+    msg.innerText="این سریال برای شما نیست یا وضعیت مناسب ندارد";
+    return;
+  }
+
+  const custId = "c"+Date.now();
+
+مرتضی, [2/21/2026 11:10 PM]
+DB.customers.push({id:custId, name, phone, username:user, password:pass});
+  rec.customerId = custId;
+  rec.status = "ACTIVE";
+  rec.startDate = new Date().toISOString().slice(0,10);
+  rec.endDate = addMonths(rec.startDate, WARRANTY_MONTHS[rec.package]);
+  saveDB(DB);
+  msg.innerText="فعال‌سازی انجام شد";
+  renderSellerSerials();
+});
+
+function renderSellerSerials(){
+  if(!currentSeller) return;
+  const list = DB.serials.filter(s=>s.sellerId===currentSeller.id);
+  const html = list.map(s=>{
+    const cust = getCustomer(s.customerId);
+    const now = new Date().toISOString().slice(0,10);
+    const daysLeft = s.endDate ? daysBetween(now, s.endDate) : null;
+    const remind = (daysLeft!==null && daysLeft<=20 && daysLeft>0 && s.package==3)
+      ? <div class="badge b-blue">۲۰ روز مانده به پایان — پیامک تخفیف تمدید</div> : "";
+    return 
+      <div class="card">
+        <div class="row">
+          ${badgeForPackage(s.package)}
+          ${badgeForStatus(s.status)}
+          <div class="pill">سریال: ${s.serial}</div>
+        </div>
+        ${remind}
+        <div class="grid grid-2">
+          <div><div class="muted small">شروع</div><div>${s.startDate||"-"}</div></div>
+          <div><div class="muted small">پایان</div><div>${s.endDate||"-"}</div></div>
+          <div><div class="muted small">نام مشتری</div><div>${cust?.name||"-"}</div></div>
+          <div><div class="muted small">شماره مشتری</div><div>${cust?.phone||"-"}</div></div>
+        </div>
+      </div>
+    ;
+  }).join("") || <div class="note">سریالی برای شما ثبت نشده است.</div>;
+  document.getElementById("seller-serials").innerHTML = html;
+}
+
+/* =======================
+   Admin Panel
+======================= */
+document.getElementById("reset-db").addEventListener("click", ()=>{
+  DB = seedDB(); saveDB(DB); loadSellerOptions(); renderAdminSerials();
+});
+document.getElementById("generate-serials").addEventListener("click", ()=>{
+  DB.serials = DB.serials.concat(generateSerials(5));
+  saveDB(DB); renderAdminSerials();
+});
+
+document.getElementById("assign-btn").addEventListener("click", ()=>{
+  const serial = document.getElementById("assign-serial").value.trim();
+  const sellerId = document.getElementById("assign-seller").value;
+  const msg = document.getElementById("assign-msg");
+  const rec = getSerial(serial);
+  if(!rec){ msg.innerText="سریال یافت نشد"; return; }
+  if(rec.status!=="RAW"){ msg.innerText="این سریال خام نیست"; return; }
+  rec.status="ASSIGNED";
+  rec.sellerId = sellerId;
+  saveDB(DB); msg.innerText="تحویل انجام شد"; renderAdminSerials();
+});
+
+document.getElementById("service-add").addEventListener("click", ()=>{
+  const serial = document.getElementById("service-serial").value.trim();
+  const title = document.getElementById("service-title").value.trim();
+  const date = document.getElementById("service-date").value.trim();
+  const msg = document.getElementById("service-msg");
+  const rec = getSerial(serial);
+  if(!rec){ msg.innerText="سریال یافت نشد"; return; }
+  const idx = rec.services.findIndex(s=>s.title===title);
+  if(idx>=0) rec.services[idx].date = date;
+  else rec.services.push({title, date});
+  saveDB(DB); msg.innerText="ذخیره شد"; renderAdminSerials();
+});
+
+document.getElementById("upgrade-btn").addEventListener("click", ()=>{
+  const serial = document.getElementById("upgrade-serial").value.trim();
+  const to = parseInt(document.getElementById("upgrade-to").value);
+  const msg = document.getElementById("upgrade-msg");
+  const rec = getSerial(serial);
+  if(!rec){ msg.innerText="سریال یافت نشد"; return; }
+  if(rec.package>=to){ msg.innerText="ارتقاء معنی ندارد"; return; }
+
+  // محاسبه اختلاف هزینه از تاریخ ارتقاء
+  const totalDays = WARRANTY_MONTHS[rec.package]*30;
+  const now = new Date().toISOString().slice(0,10);
+  const remainingDays = rec.endDate ? Math.max(0, daysBetween(now, rec.endDate)) : totalDays;
+
+مرتضی, [2/21/2026 11:10 PM]
+const diff = (PRICES[to]-PRICES[rec.package]) * (remainingDays/totalDays);
+  rec.package = to;
+  rec.endDate = addMonths(now, WARRANTY_MONTHS[to]);
+  saveDB(DB);
+  msg.innerText = ارتقاء انجام شد | مبلغ تقریبی اختلاف: ${diff.toFixed(0)} واحد;
+  renderAdminSerials();
+});
+
+function renderAdminSerials(){
+  const html = DB.serials.map(s=>{
+    const seller = getSeller(s.sellerId);
+    return 
+      <tr>
+        <td>${s.serial}</td>
+        <td>${badgeForPackage(s.package)}</td>
+        <td>${badgeForStatus(s.status)}</td>
+        <td>${seller?.name || "-"}</td>
+        <td>${s.startDate || "-"}</td>
+        <td>${s.endDate || "-"}</td>
+        <td>${(s.services||[]).length}</td>
+      </tr>
+    ;
+  }).join("");
+  document.getElementById("admin-serials").innerHTML = 
+    <table class="table">
+      <thead>
+        <tr>
+          <th>سریال</th><th>پکیج</th><th>وضعیت</th><th>فروشنده</th>
+          <th>شروع</th><th>پایان</th><th>سرویس‌ها</th>
+        </tr>
+      </thead>
+      <tbody>${html}</tbody>
+    </table>
+  ;
+}
+renderAdminSerials();
+</script>
 </body>
 </html>
+replace index.html
