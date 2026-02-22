@@ -387,7 +387,7 @@ const isSellerLoggedIn = () => localStorage.getItem("sellerLoggedIn") === "1";
       });
 
       // Wipe
-      $("wipeAll").addEventListener("click", () => {
+      $("wipeAll").addEventListener("click", () =>
         localStorage.removeItem("customers");
         renderSellerList();
         renderAdminList();
@@ -400,6 +400,7 @@ const isSellerLoggedIn = () => localStorage.getItem("sellerLoggedIn") === "1";
   </script>
 </body>
 </html>
+
 
 
 
