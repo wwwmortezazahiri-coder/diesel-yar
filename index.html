@@ -348,7 +348,6 @@ const isSellerLoggedIn = () => localStorage.getItem("sellerLoggedIn") === "1";
         }
         data.forEach(item => {
           const li = document.createElement("li");
-          li.textContent = نام: ${item.name} | پکیج: ${item.package};
           list.appendChild(li);
         });
       
@@ -403,4 +402,5 @@ const isSellerLoggedIn = () => localStorage.getItem("sellerLoggedIn") === "1";
   </script>
 </body>
 </html>
+
 
