@@ -213,7 +213,7 @@ function generateSerials(countEach=10){
   const make = (prefix)=>{
     for(let i=0;i<countEach;i++){
       const num = Math.floor(10000+Math.random()*90000);
-      list.push({serial: ${prefix}${num}, package: prefix, status:"RAW", sellerId:null, customerId:null, services:[]});
+      list.push({serial: ${prefix}${num}, package: prefix, status:"RAW", sellerId:null, customerId:null, services:[]})
     }
   };
   make(1); make(2); make(3);
@@ -541,4 +541,5 @@ renderAdminSerials();
 </script>
 </body>
 </html>
+
 
